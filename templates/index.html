@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+        <title>Tree Generator</title>
+    </head>
+    <body>
+
+  
+    <div class="row" style="width:100%">
+
+        <div id="tree-window" class="column" style="background-color:#bbb;">
+            <form  action="{{ url_for('tree') }}" method="post">
+                <label for="url">URL to Tree From: </label>
+                <input type="text" name="url" id="url" />
+
+                <input type="submit" value="Submit">
+
+            </form>
+        </div>
+
+
+        
+        <div id="preview-window" class="column" style="background-color:#aaa;" >
+            <form action="{{ url_for('open_file') }}" method="post">
+                <label for="file">File Tree To Open: </label>
+                <select id="file" name="file">
+                    {% for file in files %}
+                    <option value="{{ file }}">{{ file }}</option>
+                    {% endfor %}
+                </select>
+                <input type="submit" value="Submit">
+            </form>
+        </div>
+        
+    </div>
+
+
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.7.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

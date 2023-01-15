@@ -98,3 +98,49 @@ iframe {
     text-align: left;
     width: 49%;
 }
+
+form {
+    height: 100%;
+}
+
+
+input[type=text], select, textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    resize: vertical;
+  }
+  
+label {
+padding: 12px 12px 12px 0;
+display: inline-block;
+}
+
+input[type=button], input[type=submit], input[type=reset] {
+    background-color: #aa1d04;
+    border: none;
+    color: white;
+    padding: 16px 32px;
+    text-decoration: none;
+    margin: 4px 0px;
+    cursor: pointer;    
+    width: 100%;
+    border-radius: 4px;
+  }
+
+input[type=submit]:hover {
+background-color: #45a049;
+}
+
+label {
+    background-color: #655f5e;
+    border: none;
+    color: white;
+    padding: 16px 32px;
+    text-decoration: none;
+    margin: 0px 0px;
+    cursor: pointer;    
+    width: 100%;
+    border-radius: 0px;
+}

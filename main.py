@@ -1,6 +1,12 @@
 from functools import reduce
 import urllib.request
 from urllib.parse import unquote
+from flask import Flask, render_template, request, url_for, redirect
+from os import path
+
+TEMPLATE_FOLDER:str = "templates/"
+OUTPUT_FOLDER:str = "static/output/"
+app = Flask(__name__)
 
 def get_html_as_string_from_url(url:str, encoding:str="utf8") -> str:
     """
@@ -114,17 +120,17 @@ def get_templates() -> tuple[str, str, str]:
     Returns:
         tuple[str, str, str]: the layout of the form, the template for a folder and the template of the file.
     """
-    with open("folder_template.html", "r", encoding="utf-8") as folder_template_file:
+    with open(TEMPLATE_FOLDER + "folder_template.html", "r", encoding="utf-8") as folder_template_file:
             folder:list[str] = folder_template_file.readlines()
 
     folder_as_str = reduce(lambda line1, line2 : line1 + line2, folder)
 
-    with open("file_template.html", "r", encoding="utf-8") as file_template_file:
+    with open(TEMPLATE_FOLDER + "file_template.html", "r", encoding="utf-8") as file_template_file:
         file:list[str] = file_template_file.readlines()
 
     file_as_str = reduce(lambda line1, line2 : line1 + line2, file)
 
-    with open("layout.html", "r", encoding="utf-8") as layout_file:
+    with open(TEMPLATE_FOLDER + "layout.html", "r", encoding="utf-8") as layout_file:
         layout:list[str] = layout_file.readlines()
 
     layout_as_str = reduce(lambda line1, line2 : line1 + line2, layout)
@@ -132,17 +138,45 @@ def get_templates() -> tuple[str, str, str]:
     return layout_as_str, folder_as_str, file_as_str
 
 
-def main():
-    parent_url:str = input("Input URL to start tree (traverses from html form with the <a> tags) : \n")
-    html_file:str = input("Input destination name : \n")
-
+def generate_tree_page(parent_url:str, html_file:str):
     layout_as_str, folder_as_str, file_as_str = get_templates()
 
     tree:str = url_tree_explorer(parent_url, folder_as_str, file_as_str)
     layout_as_str = layout_as_str.replace("{{tree}}", tree)
 
-    with open(html_file, "w", encoding="utf-8") as output_file:
+    with open(OUTPUT_FOLDER + html_file, "w", encoding="utf-8") as output_file:
         output_file.write( layout_as_str )
    
-if __name__ == "__main__":
-    main()
+
+def get_list_of_trees() -> list[str]:
+    return list(map(lambda file : file.name, path.os.scandir(OUTPUT_FOLDER)))
+
+
+def main():
+    parent_url:str = input("Input URL to start tree (traverses from html form with the <a> tags) : \n")
+    html_file:str = input("Input destination name : \n")
+    generate_tree_page(parent_url, html_file)
+
+
+@app.route('/tree', methods=['POST'])
+def tree():
+    url = request.form['url']
+
+    file = url.split('/')[-2] + ".html"
+    generate_tree_page(url, url.split('/')[-2] + ".html")
+    return redirect(url_for('static', filename="output/" + file))
+        
+
+@app.route('/open', methods=['POST'])
+def open_file():
+    file = request.form['file']
+    return redirect(url_for('static', filename="output/" + file))
+
+
+@app.route('/')
+def index():
+    files = get_list_of_trees()
+    return render_template('index.html', files=files)
+
+if __name__ == '__main__':
+   app.run()
