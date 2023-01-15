@@ -1,7 +1,6 @@
-import sys
+from functools import reduce
 import urllib.request
-from urllib.parse import unquote, quote
-
+from urllib.parse import unquote
 
 def get_html_as_string_from_url(url:str, encoding:str="utf8") -> str:
     """
@@ -57,8 +56,8 @@ def get_all_links_in_html_form(html:str) -> list[str]:
     return list(filter(lambda x : x != "" , map(get_href_from_link_element, raw_list)))
 
 
-def url_tree_explorer(url:str, out, parent_url="", level=0, last = False):
-    cleaned = unquote(url.replace(parent_url, ""))
+def url_tree_explorer(url:str, folder_template:str, file_template:str, parent_url="", level=0, last = False):
+    name = unquote(url.replace(parent_url, ""))
 
     if last:
         prefix = ("| "*(level-1)).strip() + " `-- "
@@ -66,168 +65,52 @@ def url_tree_explorer(url:str, out, parent_url="", level=0, last = False):
         prefix = ("| "*level).strip() + "-- "
 
 
-
     if url.endswith("/"):
-        out.write(f'<li><span class="caret"><b><a href="{url}">{cleaned}</a></b></span>\n <ul class="nested">\n')
+        print(prefix + name)
+        html:str = folder_template.replace("{{url}}", url).replace("{{name}}", name)
         page:str =  get_html_as_string_from_url(url)
         children:list[str] = get_all_links_in_html_form(page)
 
-        print(prefix + cleaned)
-
+        children_html:str = ""
         child_count =  len(children)
         for i in range(child_count):
             is_last = (i == child_count-1)
-            url_tree_explorer(url+children[i], out, url, level+1,is_last)
+            children_html += url_tree_explorer(url + children[i], folder_template, file_template, url, level+1,is_last)
 
-        out.write(f'</ul>\n</li>\n') 
+        html = html.replace("{{children}}", children_html)
+
+        return html
+
     else:
-        out.write(f'<li><a href="{url}" class="preview">{cleaned}</a></li>\n')    
-        print(prefix + f"\u001b]8;;{url}\u001b\\{cleaned}\u001b]8;;\u001b\\")
-
-    out.write("\n")
+        print(prefix + f"\u001b]8;;{url}\u001b\\{name}\u001b]8;;\u001b\\")
+        return file_template.replace("{{url}}", url).replace("{{name}}", name)
     
 
 def main():
     parent_url:str = input("Input URL to start tree (traverses from html form with the <a> tags) : \n")
     html_file:str = input("Input destination name : \n")
 
+    with open("folder_template.html", "r", encoding="utf-8") as folder_template_file:
+        folder:list[str] = folder_template_file.readlines()
+
+    folder_as_str = reduce(lambda line1, line2 : line1 + line2, folder)
+
+    with open("file_template.html", "r", encoding="utf-8") as file_template_file:
+        file:list[str] = file_template_file.readlines()
+
+    file_as_str = reduce(lambda line1, line2 : line1 + line2, file)
+
+    with open("layout.html", "r", encoding="utf-8") as layout_file:
+        layout:list[str] = layout_file.readlines()
+
+    layout_as_str = reduce(lambda line1, line2 : line1 + line2, layout)
+    tree:str = url_tree_explorer(parent_url, folder_as_str, file_as_str)
+    layout_as_str = layout_as_str.replace("{{tree}}", tree)
+
     with open(html_file, "w", encoding="utf-8") as output_file:
-
-        output_file.write("""<!DOCTYPE html>
-    <html>
-    <head>
-    <meta name="viewport">
-    <style>
-    ul, #myUL {
-    list-style-type: none;
-    }
-
-    #myUL {
-    margin: 0;
-    padding: 0;
-    }
-
-    .caret {
-    cursor: pointer;
-    -webkit-user-select: none; /* Safari 3.1+ */
-    -moz-user-select: none; /* Firefox 2+ */
-    -ms-user-select: none; /* IE 10+ */
-    user-select: none;
-    }
-
-    .caret::before {
-    content: "▶";
-    color: black;
-    display: inline-block;
-    margin-right: 6px;
-    }
-
-    .caret-down::before {
-    -ms-transform: rotate(90deg); /* IE 9 */
-    -webkit-transform: rotate(90deg); /* Safari */
-    transform: rotate(90deg);  
-    }
-
-    .nested {
-    display: none;
-    }
-
-    .active {
-    display: block;
-    }
-
-  
-    a {
-    color: black;
-    text-decoration: none;
-    }
-
-    .content {
-    width: 100%;
-    box-sizing: border-box;
-}
-
-    * {
-    box-sizing: border-box;
-    }
-
-    body {
-        display: flex;
-        width: 100%;
-        height: 98%;
-    }
-
-    html {
-        display: flex;
-        width: 100%;
-        height: 100%;
-    }
-
-    /* Create two equal columns that floats next to each other */
-    .column {
-    float: left;
-    width: 50%;
-    padding: 10px;
-    height: 100%;
-    }
-
-    /* Clear floats after the columns */
-    .row:after {
-    display: flex;
-    content: "";
-    display: table;
-    clear: both;
-    width: auto;
-    }   
-
-    </style>
-    </head>
-<body>
-    <div class="row" style="width:100%">
-        <div class="column" style="background-color:#bbb;">
-            <ul id="myUL">
-        """)
-
-        url_tree_explorer(parent_url, output_file)
-
-        output_file.write("""
-            </ul>
-        </div>
-        
-        <div class="column" style="background-color:#aaa;">
-            <iframe src="" width="100%" height="100%">
-                <div>No online PDF viewer installed</div>
-            </iframe>
-        </div>
-    </div>
-
-    <script type="text/javascript" src="https://code.jquery.com/jquery-1.7.1.min.js"></script>
-    <script>
-        var toggler = document.getElementsByClassName("caret");
-        var i;
-
-        for (i = 0; i < toggler.length; i++) {
-        toggler[i].addEventListener("click", function() {
-            this.parentElement.querySelector(".nested").classList.toggle("active");
-            this.classList.toggle("caret-down");
-        });
-        } 
-
-        $(document).ready(function(){
-            $(document).on('mouseover','.preview',function(){
-                var path_source=$(this).attr('href');
-                $("iframe").attr("src",path_source);
-            });
-
-            $(document).on('mouseout','.preview',function(){
-            });
-        });
-
-    </script>
-</body>
-    </html>
-        """)
-
+        output_file.write(
+            layout_as_str
+        )
    
 if __name__ == "__main__":
     main()
