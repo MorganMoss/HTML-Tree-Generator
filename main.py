@@ -56,7 +56,28 @@ def get_all_links_in_html_form(html:str) -> list[str]:
     return list(filter(lambda x : x != "" , map(get_href_from_link_element, raw_list)))
 
 
-def url_tree_explorer(url:str, folder_template:str, file_template:str, parent_url="", level=0, last = False):
+def url_tree_explorer(url:str, folder_template:str, file_template:str, parent_url="", level=0, last = False) -> str:
+    """
+    Recursively looks through links, prints out progress and returns a string to represent it, using the templates to 
+    render folders and files
+
+    Args:
+        url (str): of the parent
+        folder_template (str): a string with {{url}}, {{name}}, {{children}} within. 
+        Replaces those tags with the link to the given content,
+        simplified name of the content and the children of the content respectively
+        file_template (str): a string with {{url}}, {{name}} within. 
+        Replaces those tags with the link to the given content,
+        simplified name of the content.
+        
+        parent_url (str, optional): previous url, used for recursion purposes. Defaults to "".
+        level (int, optional): depth of the current url from parent, for recursion purposes. Defaults to 0.
+        last (bool, optional): a boolean to show that the current url is the last 
+        in a list of children or not, for recursion purposes. Defaults to False.
+
+    Returns:
+        str: rendered template for this tree
+    """
     name = unquote(url.replace(parent_url, ""))
 
     if last:
@@ -86,12 +107,15 @@ def url_tree_explorer(url:str, folder_template:str, file_template:str, parent_ur
         return file_template.replace("{{url}}", url).replace("{{name}}", name)
     
 
-def main():
-    parent_url:str = input("Input URL to start tree (traverses from html form with the <a> tags) : \n")
-    html_file:str = input("Input destination name : \n")
+def get_templates() -> tuple[str, str, str]:
+    """
+    Pulls from hard coded sources: layout.html, folder_template, file_template
 
+    Returns:
+        tuple[str, str, str]: the layout of the form, the template for a folder and the template of the file.
+    """
     with open("folder_template.html", "r", encoding="utf-8") as folder_template_file:
-        folder:list[str] = folder_template_file.readlines()
+            folder:list[str] = folder_template_file.readlines()
 
     folder_as_str = reduce(lambda line1, line2 : line1 + line2, folder)
 
@@ -104,13 +128,21 @@ def main():
         layout:list[str] = layout_file.readlines()
 
     layout_as_str = reduce(lambda line1, line2 : line1 + line2, layout)
+
+    return layout_as_str, folder_as_str, file_as_str
+
+
+def main():
+    parent_url:str = input("Input URL to start tree (traverses from html form with the <a> tags) : \n")
+    html_file:str = input("Input destination name : \n")
+
+    layout_as_str, folder_as_str, file_as_str = get_templates()
+
     tree:str = url_tree_explorer(parent_url, folder_as_str, file_as_str)
     layout_as_str = layout_as_str.replace("{{tree}}", tree)
 
     with open(html_file, "w", encoding="utf-8") as output_file:
-        output_file.write(
-            layout_as_str
-        )
+        output_file.write( layout_as_str )
    
 if __name__ == "__main__":
     main()
