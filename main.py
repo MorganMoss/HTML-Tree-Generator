@@ -94,94 +94,94 @@ def main():
     with open(html_file, "w", encoding="utf-8") as output_file:
 
         output_file.write("""<!DOCTYPE html>
-<html>
-<head>
+    <html>
+    <head>
     <meta name="viewport">
     <style>
-        ul, #myUL {
-            list-style-type: none;
-        }
+    ul, #myUL {
+    list-style-type: none;
+    }
 
-        #myUL {
-            margin: 0;
-            padding: 0;
-        }
+    #myUL {
+    margin: 0;
+    padding: 0;
+    }
 
-        .caret {
-            cursor: pointer;
-            -webkit-user-select: none; /* Safari 3.1+ */
-            -moz-user-select: none; /* Firefox 2+ */
-            -ms-user-select: none; /* IE 10+ */
-            user-select: none;
-        }
+    .caret {
+    cursor: pointer;
+    -webkit-user-select: none; /* Safari 3.1+ */
+    -moz-user-select: none; /* Firefox 2+ */
+    -ms-user-select: none; /* IE 10+ */
+    user-select: none;
+    }
 
-        .caret::before {
-            content: "▶";
-            color: black;
-            display: inline-block;
-            margin-right: 6px;
-        }
+    .caret::before {
+    content: "▶";
+    color: black;
+    display: inline-block;
+    margin-right: 6px;
+    }
 
-        .caret-down::before {
-            -ms-transform: rotate(90deg); /* IE 9 */
-            -webkit-transform: rotate(90deg); /* Safari */'
-            transform: rotate(90deg);  
-        }
+    .caret-down::before {
+    -ms-transform: rotate(90deg); /* IE 9 */
+    -webkit-transform: rotate(90deg); /* Safari */
+    transform: rotate(90deg);  
+    }
 
-        .nested {
-            display: none;
-        }
+    .nested {
+    display: none;
+    }
 
-        .active {
-            display: block;
-        }
+    .active {
+    display: block;
+    }
 
-    
-        a {
-            color: black;
-            text-decoration: none;
-        }
+  
+    a {
+    color: black;
+    text-decoration: none;
+    }
 
-        .content {
-            width: 100%;
-            box-sizing: border-box;
-        }
+    .content {
+    width: 100%;
+    box-sizing: border-box;
+}
 
-        * {
-            -sizing: border-box;
-        }
+    * {
+    box-sizing: border-box;
+    }
 
-        body {
-            display: flex;
-            width: 100%;
-            height: 98%;
-        }
+    body {
+        display: flex;
+        width: 100%;
+        height: 98%;
+    }
 
-        html {
-            display: flex;
-            width: 100%;
-            height: 100%;
-        }
+    html {
+        display: flex;
+        width: 100%;
+        height: 100%;
+    }
 
-        /* Create two equal columns that floats next to each other */
-        .column {
-            float: left;
-            width: 50%;
-            padding: 10px;
-            height: 100%;
-        }
+    /* Create two equal columns that floats next to each other */
+    .column {
+    float: left;
+    width: 50%;
+    padding: 10px;
+    height: 100%;
+    }
 
-        /* Clear floats after the columns */
-        .row:after {
-            display: flex;
-            content: "";
-            display: table;
-            clear: both;
-            width: auto;
-        }   
+    /* Clear floats after the columns */
+    .row:after {
+    display: flex;
+    content: "";
+    display: table;
+    clear: both;
+    width: auto;
+    }   
 
     </style>
-</head>
+    </head>
 <body>
     <div class="row" style="width:100%">
         <div class="column" style="background-color:#bbb;">
